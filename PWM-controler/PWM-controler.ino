@@ -3,7 +3,7 @@
 // October 2020
 
 #include<stdio.h>
-//#include "libraries/Ticker_ESP32-master/Ticker.h"
+#include "Ticker.h"
 
 #define START_BYTE 0x0f
 #define SAMPLING_PERIOD 5.0f  // scale is ms
@@ -103,11 +103,6 @@ void setup()
 //  ticker.attach_us(SAMPLING_PERIOD/128.0f, PWM_processor);
 //  input_test_data.attach_us(SAMPLING_PERIOD, set_test_buffer);
 
-  char pathname[PATHNAME_SIZE];
-  memset(pathname, '\0', PATHNAME_SIZE); 
-
-  getcwd(pathname, PATHNAME_SIZE);
-  Serial.println("%s", pathname);
 }
 
 
