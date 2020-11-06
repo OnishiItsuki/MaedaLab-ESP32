@@ -9,8 +9,6 @@
 #define BYTE_A 2*i
 #define BYTE_B 2*i+1
 
-#define PATHNAME_SIZE 512
-
 // set output pins
 // right side
 #define boomOutA 15
