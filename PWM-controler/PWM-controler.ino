@@ -2,7 +2,7 @@
 // Itsuki Onishi
 // October 2020
 
-#include <ESP32_Ticker.h>
+#include <Ticker.h>
 
 #define START_BYTE 0x0f
 #define SAMPLING_PERIOD 5.0f  // scale is ms
@@ -15,27 +15,29 @@
 #define boomOutB 2
 #define armOutA 0
 #define armOutB 4
-#define bucketOutA 16
-#define bucketOutB 17
+#define bucketOutA 13
+#define bucketOutB 12
 // left side
-#define slewingOutA 12
-#define slewingOutB 14
-#define rightWheelOutA 27
-#define rightWheelOutB 26
-#define leftWheelOutA 25
-#define leftWheelOutB 33
+#define slewingOutA 14
+#define slewingOutB 27
+#define rightWheelOutA 26
+#define rightWheelOutB 25
+#define leftWheelOutA 33
+#define leftWheelOutB 32
 
-uint8_t buffer[8];
+uint8_t buffer[8];  // This list stock input signal
 
-int outputBuffer[12];  // for setting output 0 or 1 to each Digital
-int bufferIndex = 0;
+int outputBuffer[12];  // This list hold Duty ratio on each pins
+int bufferIndex = 0;  // This is the index of waiting sinal
 int outProcCounter = 0;
 int outProcFlag = 0;
 int test_count = 0;
 
-Ticker ticker(0);
-Ticker input_test_data(1);
+Ticker ticker;
+Ticker input_test_data;  //for test
 
+
+//  for test
 void set_test_buffer(void)
 {
     buffer[0] = 31;
@@ -45,98 +47,108 @@ void set_test_buffer(void)
     buffer[4] = 228;
     buffer[5] = 178;
     buffer[6] = 138;
-    buffer[7] = 248;
+    buffer[7] = 220;
 }
 
 
+// set duty ratio on each pins
 void set_output(void)
 {
-  digitalWrite(boomOutA, outputBuffer[0]);
-  digitalWrite(boomOutB, outputBuffer[1]);
-  digitalWrite(armOutA, outputBuffer[2]);
-  digitalWrite(armOutB, outputBuffer[3]);
-  digitalWrite(bucketOutA, outputBuffer[4]);
-  digitalWrite(bucketOutB, outputBuffer[5]);
-  digitalWrite(slewingOutA, outputBuffer[6]);
-  digitalWrite(slewingOutB, outputBuffer[7]);
-  digitalWrite(rightWheelOutA, outputBuffer[8]);
-  digitalWrite(rightWheelOutB, outputBuffer[9]);
-  digitalWrite(leftWheelOutA, outputBuffer[10]);
-  digitalWrite(leftWheelOutB, outputBuffer[11]);
+  ledcWrite(0, outputBuffer[0]);
+  ledcWrite(1, outputBuffer[1]);
+  ledcWrite(2, outputBuffer[2]);
+  ledcWrite(3, outputBuffer[3]);
+  ledcWrite(4, outputBuffer[4]);
+  ledcWrite(5, outputBuffer[5]);
+  ledcWrite(6, outputBuffer[6]);
+  ledcWrite(7, outputBuffer[7]);
+  ledcWrite(8, outputBuffer[8]);
+  ledcWrite(9, outputBuffer[9]);
+  ledcWrite(10, outputBuffer[10]);
+  ledcWrite(11, outputBuffer[11]);
 }
 
 
 void setup()
 {
   // initialize pins
-  pinMode(boomOutA, OUTPUT);
-  pinMode(boomOutB, OUTPUT);
-  pinMode(armOutA, OUTPUT);
-  pinMode(armOutB, OUTPUT);
-  pinMode(bucketOutA, OUTPUT);
-  pinMode(bucketOutB, OUTPUT);
-  pinMode(slewingOutA, OUTPUT);
-  pinMode(slewingOutB, OUTPUT);
-  pinMode(rightWheelOutA, OUTPUT);
-  pinMode(rightWheelOutB, OUTPUT);
-  pinMode(leftWheelOutA, OUTPUT);
-  pinMode(leftWheelOutB, OUTPUT);
-  
+  ledcSetup(0, 115200, 7);
+  ledcAttachPin(boomOutA, 0);
+  ledcSetup(1, 115200, 7);
+  ledcAttachPin(boomOutB, 1);
+  ledcSetup(2, 115200, 7);
+  ledcAttachPin(armOutA, 2);
+  ledcSetup(3, 115200, 7);
+  ledcAttachPin(armOutB, 3);
+  ledcSetup(4, 115200, 7);
+  ledcAttachPin(bucketOutA, 4);
+  ledcSetup(5, 115200, 7);
+  ledcAttachPin(bucketOutB, 5);
+  ledcSetup(6, 115200, 7);
+  ledcAttachPin(slewingOutA, 6);
+  ledcSetup(7, 115200, 7);
+  ledcAttachPin(slewingOutB, 7);
+  ledcSetup(8, 115200, 7);
+  ledcAttachPin(rightWheelOutA, 8);
+  ledcSetup(9, 115200, 7);
+  ledcAttachPin(rightWheelOutB, 9);
+  ledcSetup(10, 115200, 7);
+  ledcAttachPin(leftWheelOutA, 10);
+  ledcSetup(11, 115200, 7);
+  ledcAttachPin(leftWheelOutB, 11);
+
+  // initial state is free run
   for(int i=0; i<8; i++) {
     buffer[i] = 0;
   }
   for(int i=0; i<6; i++) {
-    outputBuffer[BYTE_A] = LOW;
-    outputBuffer[BYTE_B] = HIGH;
+    outputBuffer[BYTE_A] = 0;
+    outputBuffer[BYTE_B] = 0;
   }
   set_output();
 
   // initalize serial port
-  Serial.begin(9600);
-
-  // initial state is free run
+  Serial.begin(115200);
   Serial.println("+");
-  ticker.attach_us(SAMPLING_PERIOD/128.0f, PWM_processor);
-  input_test_data.attach_us(SAMPLING_PERIOD, set_test_buffer);
+
+  // set tickers
+  ticker.attach_ms(SAMPLING_PERIOD, PWM_processor);
+  // for test
+  input_test_data.attach_ms(SAMPLING_PERIOD, set_test_buffer);
 
 }
 
 
+//  control whitch pins (A or B) are LOW or HIGH on each DoF.
+//  outputBuffer that is HIGH pin holds duty ratio.
 void PWM_processor(void)
 {
-    for(int i=0; i<6; i++) {
-        if((buffer[i+1]==0) || (buffer[i+1]==128)) {
-            outputBuffer[BYTE_A] = LOW;
-            outputBuffer[BYTE_B] = LOW;
-            continue;
-        }
-
-        if(buffer[i+1]>128) {
-            outputBuffer[BYTE_A] = LOW;
-            outputBuffer[BYTE_B] = HIGH;
-        } else {
-            outputBuffer[BYTE_A] = HIGH;
-            outputBuffer[BYTE_B] = LOW;
-        }
-
-        // decrement
-        if (buffer[i+1] > 0)
-            buffer[i+1]--;
-    }
-    set_output();
+  for(int i=0; i<6; i++) {
+    // buffer[0] is start byte, so input signals start from 1
+    // Both pins is LOW when buffer is 0 or 128.
+      if(buffer[i+1]>=128) {
+          outputBuffer[BYTE_A] = 0;
+          outputBuffer[BYTE_B] = buffer[i+1] - 128;
+      } else {
+          outputBuffer[BYTE_A] = buffer[i+1];
+          outputBuffer[BYTE_B] = 0;
+      }
+      buffer[i+1] = 0;
+  }
+  set_output();
 }
 
 
-void event_func(void)
+void loop()
 {
-
+  //  if(pc.readable(){ ??
   // For test
   bufferIndex = 8;
-    Serial.println("check buffer");
-    for(int i=0; i<8; i++){
-    Serial.println(i);
-    Serial.println(buffer[i]);
-  }
+//    Serial.println("check buffer");
+//    for(int i=0; i<8; i++){
+//    Serial.println(i);
+//    Serial.println(buffer[i]);
+//  }
   uint8_t rx = buffer[0];
   // end of code for test
 
@@ -155,7 +167,7 @@ void event_func(void)
   if(bufferIndex == 8) {
     bufferIndex = 0;
 
-//    check parity
+//  check parity
     uint8_t serialXOR = buffer[1];
     for (int i=2; i<=6; i++) {
       serialXOR ^= buffer[i];
@@ -170,20 +182,4 @@ void event_func(void)
       outProcFlag = 1;
     }
   }
-}
-
-void loop()
-{
-//  if(pc.readable(){
-    event_func();
-    test_count++;
-//  }
-
-//code for test
-  if(test_count%1000 == 0) {
-    Serial.println("+");
-    test_count = 0;
-  }
-//end of code for test
-
 }
