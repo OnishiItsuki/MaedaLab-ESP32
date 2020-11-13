@@ -95,6 +95,8 @@ void setup()
 
   // set tickers
   ticker.attach_ms(SAMPLING_PERIOD, PWM_processor);
+
+  delay(5);
 }
 
 
@@ -120,11 +122,6 @@ void PWM_processor(void)
 
 void loop()
 {
-  test_count++;
-  Serial.println(test_count);
-  if(test_count == 1000){
-    input_test_data.detach();
-  }
   //  if(pc.readable(){  // TODO: run following when I get input signal
 
   uint8_t rx = buffer[0];
@@ -156,5 +153,6 @@ void loop()
       Serial.print(", buffer byte is ");
       Serial.println(buffer[7]);
       return;
+    }
   }
 }
