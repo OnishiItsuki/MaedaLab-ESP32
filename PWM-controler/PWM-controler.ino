@@ -29,26 +29,9 @@ uint8_t buffer[8];  // This list stock input signal
 
 int outputBuffer[12];  // This list hold Duty ratio on each pins
 int bufferIndex = 0;  // This is the index of waiting sinal
-int outProcCounter = 0;
-int outProcFlag = 0;
-int test_count = 0;
+
 
 Ticker ticker;
-Ticker input_test_data;  //for test
-
-
-//  for test
-void set_test_buffer(void)
-{
-    buffer[0] = 31;
-    buffer[1] = 30;
-    buffer[2] = 20;
-    buffer[3] = 10;
-    buffer[4] = 228;
-    buffer[5] = 178;
-    buffer[6] = 138;
-    buffer[7] = 220;
-}
 
 
 // set duty ratio on each pins
@@ -109,13 +92,9 @@ void setup()
 
   // initalize serial port
   Serial.begin(115200);
-  Serial.println("+");
 
   // set tickers
   ticker.attach_ms(SAMPLING_PERIOD, PWM_processor);
-  // for test
-  input_test_data.attach_ms(SAMPLING_PERIOD, set_test_buffer);
-
 }
 
 
@@ -141,27 +120,25 @@ void PWM_processor(void)
 
 void loop()
 {
-  //  if(pc.readable(){ ??
-  // For test
-  bufferIndex = 8;
-//    Serial.println("check buffer");
-//    for(int i=0; i<8; i++){
-//    Serial.println(i);
-//    Serial.println(buffer[i]);
-//  }
-  uint8_t rx = buffer[0];
-  // end of code for test
+  test_count++;
+  Serial.println(test_count);
+  if(test_count == 1000){
+    input_test_data.detach();
+  }
+  //  if(pc.readable(){  // TODO: run following when I get input signal
 
-//        uint8_t rx = pc.getc();
-//
+  uint8_t rx = buffer[0];
+
+//   uint8_t rx = pc.getc();  // TODO: get inpudata from wifi
+
 //  wait start byte
   if(bufferIndex == 0 && rx != START_BYTE) {
     Serial.println("start byte ERROR");
     return;
   }
 
-//        // push serial to buffer
-//        buffer[bufferIndex++] = rx;
+  // push serial to buffer
+  buffer[bufferIndex++] = rx;
 
 //  when buffer is full
   if(bufferIndex == 8) {
@@ -169,17 +146,15 @@ void loop()
 
 //  check parity
     uint8_t serialXOR = buffer[1];
+    Serial.print("buffer: [");
     for (int i=2; i<=6; i++) {
       serialXOR ^= buffer[i];
     }
     if (serialXOR != buffer[7]) {
       Serial.print("parity byte ERROR: XOR is ");
       Serial.print(serialXOR);
-      Serial.print(" buffer byte is ");
+      Serial.print(", buffer byte is ");
       Serial.println(buffer[7]);
       return;
-    } else {
-      outProcFlag = 1;
-    }
   }
 }
