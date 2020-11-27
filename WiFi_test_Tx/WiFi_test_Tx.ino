@@ -36,9 +36,12 @@ void setup() {
 
 void loop()
 {
-  udp.beginPacket(RxIP, RxPort);
-  udp.write('a');
-  udp.endPacket();
-
+  if (WiFi.status() != WL_CONNECTED){
+    Serial.println("Disconnected");
+  } else {
+    udp.beginPacket(RxIP, RxPort);
+    udp.write('a');
+    udp.endPacket();  
+  }
   delay(3000);
 }
