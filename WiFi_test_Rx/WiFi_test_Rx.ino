@@ -15,17 +15,14 @@ void setup() {
   Serial.println();
   
   // setup ESP32 as Access Point
-  WiFi.mode(WIFI_AP);
+  WiFi.mode(WIFI_STA);
   WiFi.softAP(ssid, password);
   delay(100);
   WiFi.softAPConfig(RxIP, RxIP, subnet);
 
-  Serial.print("AP IP address: ");
   IPAddress myIP = WiFi.softAPIP();
-  Serial.println(myIP);
-
+  Serial.println("AP IP address: " + myIP.toString());
   Serial.println("Starting UDP");
-
   Serial.print("Local port: ");
   Serial.println(localPort);
 }
@@ -34,5 +31,8 @@ void loop() {
   if (udp.parsePacket()) {
     char tmp = udp.read();
     Serial.println(tmp);
+  } else {
+//    Serial.println(udp.parsePacket());
+//    Serial.println("else");
   }
 }
