@@ -2,7 +2,7 @@
 #include <WiFiUdp.h>
 
 const char ssid[] = "ESP32_AP";
-const char password[] = "esp32pass";
+const char password[] = "damedame";
 
 static WiFiUDP udp;
 static const char *RxIP = "192.168.4.13";
@@ -45,17 +45,10 @@ void loop()
 {
   if (WiFi.status() != WL_CONNECTED){
     Serial.println("Disconnected");
-    Wifi_setup();
   } else {
-  wifiUdp.beginPacket(kRemoteIpadr, kRmoteUdpPort);  
-  wifiUdp.write((unsigned char)(t>>24&0xff));    //packet sending
-  wifiUdp.write((unsigned char)(t>>16&0xff));    //packet sending
-  wifiUdp.write((unsigned char)(t>>8&0xff));    //packet sending
-  wifiUdp.write((unsigned char)(t&0xff));    //packet sending
-  wifiUdp.endPacket();
-
-  Serial.println(t); // to separate line
-  delay(10);
+    udp.beginPacket(RxIP, RxPort);
+    udp.write('a');
+    udp.endPacket();  
   }
   delay(3000);
 }
