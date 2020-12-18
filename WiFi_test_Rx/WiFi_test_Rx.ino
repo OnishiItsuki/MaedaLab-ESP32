@@ -40,12 +40,30 @@ void setup() {
   UDP_setup();
 }
 
+char c[1024];
+long err_cnt = 0;
+
 void loop() {
   if (udp.parsePacket()) {
-    char tmp = udp.read();
-    Serial.println(tmp);
-  } else {
-//    Serial.println(udp.parsePacket());
-//    Serial.println("else");
+    udp.read(c, 4);
+    unsigned long t1 = ((unsigned long)(c[0] & 0xff)) << 24;
+    unsigned long t2 = ((unsigned long)(c[1] & 0xff)) << 16;
+    unsigned long t3 = ((unsigned long)(c[2] & 0xff)) << 8;
+    unsigned long t4 =  (unsigned long) c[3];
+    Serial.println(t1 + t2 + t3 + t4);
+
+    // reset watch dog counter
+    err_cnt = 0;
+    return;
   }
+    else
+  {
+    if (err_cnt++>10000)
+    {
+      // reconnect
+      Wifi_setup();
+
+      // reset watch dog counter
+      err_cnt = 0;
+    }
 }
