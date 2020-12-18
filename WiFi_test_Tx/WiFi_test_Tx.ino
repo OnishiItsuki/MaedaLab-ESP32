@@ -10,12 +10,8 @@ static const int RxPort = 10000;
 
 static const int localPort = 5000;
 
-
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
-  
-  // WiFi setup
+static void Wifi_setup()
+{
   Serial.print("Connecting to ");
   Serial.print(ssid);
   Serial.print("  , ID is ");
@@ -26,12 +22,23 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  
+}
+
+void setup() {
+  Serial.begin(115200);
   Serial.println();
-  Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  
+  // WiFi setup
+  Wifi_setup();
   udp.begin(localPort);
+
+  Serial.println("\n\n **************************");
+  Serial.println(" * Connected Successfully *");
+  Serial.println(" **************************");
+  Serial.println("");
+  Serial.print(" My ip address is : ");   Serial.println(RxIP);
+  Serial.print(" My port numper is : ");  Serial.println(RxPort);
+  Serial.println("");
 }
 
 void loop()
