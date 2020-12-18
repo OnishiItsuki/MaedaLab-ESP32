@@ -10,6 +10,8 @@ const IPAddress subnet(255, 255, 255, 0);
 
 WiFiUDP udp;
 
+static uint8_t buffer[8];
+
 static void Wifi_setup()
 {
   // setup ESP32 as Access Point
@@ -45,12 +47,14 @@ long err_cnt = 0;
 
 void loop() {
   if (udp.parsePacket()) {
-    udp.read(c, 4);
-    unsigned long t1 = ((unsigned long)(c[0] & 0xff)) << 24;
-    unsigned long t2 = ((unsigned long)(c[1] & 0xff)) << 16;
-    unsigned long t3 = ((unsigned long)(c[2] & 0xff)) << 8;
-    unsigned long t4 =  (unsigned long) c[3];
-    Serial.println(t1 + t2 + t3 + t4);
+    udp.read(c, 8);
+    for (int i=0; i<8; i++) {
+      buffer[i] = ((uint8_t)(c[i] & 0xff));
+    }
+    Serial.println("print Buffer array");
+    for (int i=0; i<8; i++) {
+      Serial.println(buffer[i]);
+    }
 
     // reset watch dog counter
     err_cnt = 0;
@@ -58,12 +62,11 @@ void loop() {
   }
     else
   {
-    if (err_cnt++>10000)
+    if (err_cnt++>100000)
     {
-      // reconnect
-      Wifi_setup();
-
+      Serial.println("Disconeted");
       // reset watch dog counter
       err_cnt = 0;
     }
+  }
 }
