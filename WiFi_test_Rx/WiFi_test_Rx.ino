@@ -40,6 +40,7 @@ void setup() {
 
   Wifi_setup();
   UDP_setup();
+  PWM_init();
 }
 
 char c[1024];
