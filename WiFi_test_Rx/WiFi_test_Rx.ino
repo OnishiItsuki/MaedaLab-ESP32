@@ -49,21 +49,16 @@ long err_cnt = 0;
 void loop() {
   if (udp.parsePacket()) {
     udp.read(c, 8);
-    for (int i=0; i<8; i++) {
-      buffer[i] = ((uint8_t)(c[i] & 0xff));
+    for (int i = 0; i < 8; i++) {
+      buffer[i] = (c[i]);
     }
-    Serial.println("print Buffer array");
-    for (int i=0; i<8; i++) {
-      Serial.println(buffer[i]);
-    }
+    check_values();
 
     // reset watch dog counter
     err_cnt = 0;
     return;
-  }
-    else
-  {
-    if (err_cnt++>100000)
+  } else {
+    if (err_cnt++ > 100000)
     {
       Serial.println("Disconeted");
       // reset watch dog counter
