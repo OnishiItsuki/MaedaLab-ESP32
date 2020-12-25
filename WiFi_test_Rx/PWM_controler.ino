@@ -16,7 +16,7 @@
 #define armOutA 0
 #define armOutB 4
 #define bucketOutA 13
-#define bucketOutB 12月
+#define bucketOutB 12
 // left side
 #define slewingOutA 14
 #define slewingOutB 27
@@ -55,7 +55,7 @@ void set_output(void)
 void pin_init()
 {
   // initialize pins
-  for (int i=0; i<12; i++) {
+  for (int i = 0; i < 12; i++) {
     ledcSetup(i, 115200, 7);
   }
   ledcAttachPin(boomOutA, 0);
@@ -72,10 +72,10 @@ void pin_init()
   ledcAttachPin(leftWheelOutB, 11);
 
   // initial state is free run
-  for(int i=0; i<8; i++) {
+  for (int i = 0; i < 8; i++) {
     PWM_buffer[i] = 0;
   }
-  for(int i=0; i<6; i++) {
+  for (int i = 0; i < 6; i++) {
     outputBuffer[BYTE_A] = 0;
     outputBuffer[BYTE_B] = 0;
   }
@@ -87,17 +87,17 @@ void pin_init()
 //  outputBuffer that is HIGH pin holds duty ratio.
 void PWM_processor(void)
 {
-  for(int i=1; i<7; i++) {
+  for (int i = 1; i < 7; i++) {
     // buffer[0] is start byte, so input signals start from 1
     // Both pins is LOW when buffer is 0 or 128.
-      if(buffer[i]>=128) {
-          outputBuffer[BYTE_A] = 0;
-          outputBuffer[BYTE_B] = buffer[i] - 128;
-      } else {
-          outputBuffer[BYTE_A] = buffer[i];
-          outputBuffer[BYTE_B] = 0;
-      }
-      buffer[i] = 0;
+    if (buffer[i] >= 128) {
+      outputBuffer[BYTE_A] = 0;
+      outputBuffer[BYTE_B] = buffer[i] - 128;
+    } else {
+      outputBuffer[BYTE_A] = buffer[i];
+      outputBuffer[BYTE_B] = 0;
+    }
+    buffer[i] = 0;
   }
   set_output();
 }
@@ -106,7 +106,7 @@ void PWM_processor(void)
 void PWM_init()
 {
   pin_init();
-  
+
   // set tickers
   ticker.attach_ms(SAMPLING_PERIOD, PWM_processor);
 
@@ -114,26 +114,26 @@ void PWM_init()
 }
 
 
-int check_values(*buffer)
+int check_values(uint8_t buffer[])
 {
-  if(buffer[0] != byte_tmp) {
+  if (buffer[0] != START_BYTE) {
     Serial.println("start byte ERROR");
     return 0;
   }
 
-//  check parity
-    uint8_t serialXOR = buffer[1];
-    Serial.print("buffer: [");
-    for (int i=2; i<=6; i++) {
-      serialXOR ^= buffer[i];
-    }
-    if (serialXOR != buffer[7]) {
-      Serial.print("parity byte ERROR: XOR is ");
-      Serial.print(serialXOR);
-      Serial.print(", buffer byte is ");
-      Serial.println(buffer[7]);
-      return 0;
-    }
+  //  check parity
+  uint8_t serialXOR = buffer[1];
+  Serial.print("buffer: [");
+  for (int i = 2; i <= 6; i++) {
+    serialXOR ^= buffer[i];
   }
+  if (serialXOR != buffer[7]) {
+    Serial.print("parity byte ERROR: XOR is ");
+    Serial.print(serialXOR);
+    Serial.print(", buffer byte is ");
+    Serial.println(buffer[7]);
+    return 0;
+  }
+
   return 1;
 }
