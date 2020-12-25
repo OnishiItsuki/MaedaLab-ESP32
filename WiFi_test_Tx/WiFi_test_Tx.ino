@@ -10,12 +10,12 @@ static const int RxPort = 10000;
 static const int localPort = 5000;
 
 uint8_t start_byte = 0x0f;
-uint8_t boom_byte = 0x01;
-uint8_t arm_byte = 0x02;
-uint8_t bucket_byte = 0x01;
-uint8_t slewing_byte = 0x04;
-uint8_t r_wheel_byte = 0x08;
-uint8_t l_wheel_byte = 0x10;
+uint8_t boom_byte = 10;
+uint8_t arm_byte = 50;
+uint8_t bucket_byte = 100;
+uint8_t slewing_byte = 138;
+uint8_t r_wheel_byte = 178;
+uint8_t l_wheel_byte = 228;
 uint8_t parity_byte = 0x00;
 
 uint8_t buffer[8];
@@ -26,7 +26,7 @@ static void Wifi_setup()
   Serial.print(ssid);
   Serial.print("  , ID is ");
   Serial.println(RxIP);
-  
+
   WiFi.begin(ssid, password);
   while ( WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -37,7 +37,7 @@ static void Wifi_setup()
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  
+
   // WiFi setup
   Wifi_setup();
   udp.begin(localPort);
@@ -61,7 +61,7 @@ static void AD_converter()
   buffer[3] = bucket_byte;
   buffer[4] = slewing_byte;
   buffer[5] = r_wheel_byte;
-  buffer[6] = l_wheel_byte; 
+  buffer[6] = l_wheel_byte;
 }
 
 static unsigned int comp_parity()
@@ -69,9 +69,9 @@ static unsigned int comp_parity()
   // initialize parity buffer
   buffer[7] = 0;
 
-//  compute parity buffer
+  //  compute parity buffer
   uint8_t tmp = buffer[1];
-  for(int i=2; i<7; i++) {
+  for (int i = 2; i < 7; i++) {
     tmp ^= buffer[i];
   }
   return tmp;
@@ -80,23 +80,23 @@ static unsigned int comp_parity()
 void loop()
 {
   AD_converter();
-  if (WiFi.status() != WL_CONNECTED){
+  if (WiFi.status() != WL_CONNECTED) {
     Serial.println("Disconnected");
     Wifi_setup();
   } else {
-  buffer[7] = comp_parity();
-  
-  udp.beginPacket(RxIP, RxPort);
-  for(int i=0; i<8; i++) {
-    udp.write((unsigned char)(buffer[i]&0xff));    //packet sending
-  }
-  udp.endPacket();
+    buffer[7] = comp_parity();
 
-  Serial.println("print Buffer array");
-  for(int i=0; i<8; i++) {
-    Serial.println((unsigned char)(buffer[i]&0xff)); // to separate line
-  }
+    udp.beginPacket(RxIP, RxPort);
+    for (int i = 0; i < 8; i++) {
+      udp.write(buffer[i]);    //packet sending
+    }
+    udp.endPacket();
 
-  delay(1000);
+    Serial.println("print Buffer array");
+    for (int i = 0; i < 8; i++) {
+      Serial.println(buffer[i]); // to separate line
+    }
+
+    delay(1000);
   }
 }
