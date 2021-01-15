@@ -1,5 +1,5 @@
-const int InputR = 25;
-const int InputL = 33
+const int InputP = 25;
+const int InputN = 33;
 const int VOLT = 3.3;
 const int ANALOG_MAX = 4096;
 
@@ -8,24 +8,18 @@ void setup() {
 }
 
 void loop() {
-  int reading = analogRead(voutPin);
+  int read_P = analogRead(InputP);
+  int read_N = analogRead(InputN);
 
-  float voltage = ((long)reading * VOLT * 1000) / ANALOG_MAX;
+  float voltage_P = (long)read_P * VOLT / ANALOG_MAX;
+  float voltage_N = (long)read_N * VOLT / ANALOG_MAX;
 
-  Serial.print(voltage);
-  Serial.print(" mV, ");
-
-
-  float microamp = (voltage * 1000) / 1000;
-
-  Serial.print(microamp);
-  Serial.print(" uA, ");
-
-
-  float lx = microamp / (290 / 100);
-
-  Serial.print(lx);
-  Serial.println(" lx");
-
+  Serial.print("Positive:");
+  Serial.print(voltage_P);
+  Serial.print(" V, ");
+  Serial.print("Negative:");
+  Serial.print(voltage_N);
+  Serial.print("V");
+  
   delay(1000);
 }
