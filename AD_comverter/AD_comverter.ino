@@ -1,5 +1,5 @@
-const int InputP = 25;
-const int InputN = 33;
+const int InputP = 33;
+const int InputN = 35;
 const int VOLT = 3.3;
 const int ANALOG_MAX = 4096;
 
@@ -11,15 +11,21 @@ void loop() {
   int read_P = analogRead(InputP);
   int read_N = analogRead(InputN);
 
-  float voltage_P = (long)read_P * VOLT / ANALOG_MAX;
-  float voltage_N = (long)read_N * VOLT / ANALOG_MAX;
+  float voltage_P = (long)read_P * VOLT * 1000 / ANALOG_MAX;
+  float voltage_N = (long)read_N * VOLT * 1000 / ANALOG_MAX;
+  float voltage_sum = voltage_P + voltage_N;
 
   Serial.print("Positive:");
   Serial.print(voltage_P);
-  Serial.print(" V, ");
+  Serial.print(" mV, ");
+  
   Serial.print("Negative:");
   Serial.print(voltage_N);
-  Serial.print("V");
+  Serial.print(" mV, ");
+
+  Serial.print("Sum:");
+  Serial.print(voltage_sum);
+  Serial.println("mV");
   
-  delay(1000);
+  delay(500);
 }
