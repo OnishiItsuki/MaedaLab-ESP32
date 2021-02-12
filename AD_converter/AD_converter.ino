@@ -1,13 +1,18 @@
 #define InputP 35
 #define InputN 33
 
+#define DIG_RANGE 128
+
 const int VOLT = 3.3;
 const int ANALOG_MAX = 4096;
-const long CALIB_TIME = 1000;
+const long CALIB_TIME = 1000; // Scale is "milli second""
+
 
 int AnaInputP = 0;
 int AnaInputN = 0;
 int AnaInputDiff = 0;
+
+float DigInput = 0;
 
 int MaxAnaInput = 0;
 int MinAnaInput = 0;
@@ -95,14 +100,20 @@ void Calibration()
   Serial.println("Finish calibration. Result is following");
   Serial.print("Max value: ");
   Serial.print(MaxAnaInput);
-  Serial.print("Min value: ");
+  Serial.print("  Min value: ");
   Serial.print(MinAnaInput);
   Serial.print("\n\n");
 }
 
-uint8_t AD_converter(float AnaPosSign, float AnaNegSign)
+uint8_t AD_converter()
 {
-
+  if (AnaInputDiff > 0) {
+    DigInput = (AnaInputDiff / MaxAnaInput * DIG_RANGE);
+  } else {
+    DigInput = (AnaInputDiff / MinAnaInput * DIG_RANGE);
+  }
+  Serial.print("  Digital input: ");
+  Serial.println(DigInput);
 }
 
 
@@ -115,7 +126,10 @@ void setup()
 
 void loop()
 {
-  Serial.println("a");
+  Read_pin();
+  Serial.print("Analog input: ");
+  Serial.print(AnaInputDiff);
+  AD_converter();
   //
   //  Read_pin();
   //
