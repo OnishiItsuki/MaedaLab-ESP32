@@ -1,7 +1,9 @@
+#include <Wire.h>
+
 #define InputP 35
 #define InputN 33
-
 #define DIG_RANGE 128
+#define SLAVE_ADDR 0x1E
 
 const int VOLT = 3.3;
 const int ANALOG_MAX = 4096;
@@ -14,8 +16,10 @@ int AnaInputDiff = 0;
 
 float DigInput = 0;
 
-int MaxAnaInput = 0;
-int MinAnaInput = 0;
+//int MaxAnaInput = 0;
+//int MinAnaInput = 0;
+int MaxAnaInput = 3200;
+int MinAnaInput = -3200;
 
 void Read_pin()
 {
@@ -116,20 +120,29 @@ uint8_t AD_converter()
   Serial.println(DigInput);
 }
 
+void send_Diff() 
+{
+  Wire.write((byte)AnaInputDiff);
+}
+
 
 
 void setup()
 {
-  Serial.begin(115200);
-  Calibration();
+//  Serial.begin(115200);
+//  Calibration();
+
+  Wire.begin(SLAVE_ADDR);
+  Wire.onRequest(send_Diff);
 }
 
 void loop()
 {
   Read_pin();
-  Serial.print("Analog input: ");
-  Serial.print(AnaInputDiff);
+//  Serial.print("Analog input: ");
+//  Serial.print(AnaInputDiff);
   AD_converter();
+    
   //
   //  Read_pin();
   //
@@ -154,5 +167,5 @@ void loop()
   //  Serial.print("  ,N: ");
   //  Serial.println(AnaInputN);
 
-  delay(500);
+//  delay(500);
 }
