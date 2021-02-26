@@ -1,4 +1,4 @@
-#include <Wire.h>
+#include "Wire.h"
 
 #define InputP 35
 #define InputN 33
@@ -7,7 +7,7 @@
 
 const int VOLT = 3.3;
 const int ANALOG_MAX = 4096;
-const long CALIB_TIME = 1000; // Scale is "milli second""
+const long CALIB_TIME = 1000; // Scale is "milli second"
 
 
 int AnaInputP = 0;
@@ -112,28 +112,26 @@ void Calibration()
 uint8_t AD_converter()
 {
   if (AnaInputDiff > 0) {
-    DigInput = (AnaInputDiff / MaxAnaInput * DIG_RANGE);
+    DigInput = (uint8_t)(AnaInputDiff / MaxAnaInput * DIG_RANGE);
   } else {
-    DigInput = (AnaInputDiff / MinAnaInput * DIG_RANGE);
+    DigInput = (uint8_t)((AnaInputDiff / MinAnaInput * DIG_RANGE) * (-1) + 128);
   }
   Serial.print("  Digital input: ");
   Serial.println(DigInput);
 }
 
-void send_Diff() 
+void send_Diff()
 {
   Wire.write((byte)AnaInputDiff);
 }
 
 
-
 void setup()
 {
-//  Serial.begin(115200);
+  Serial.begin(115200);
 //  Calibration();
 
   Wire.begin(SLAVE_ADDR);
-  Wire.onRequest(send_Diff);
 }
 
 void loop()
@@ -142,6 +140,7 @@ void loop()
 //  Serial.print("Analog input: ");
 //  Serial.print(AnaInputDiff);
   AD_converter();
+  Wire.onRequest(send_Diff);
     
   //
   //  Read_pin();
