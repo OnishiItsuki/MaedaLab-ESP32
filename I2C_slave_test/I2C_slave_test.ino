@@ -3,7 +3,7 @@
 
 // I2C Slave in Seeeduino XIAO
 
-// reference : 
+// reference :
 
 // I2C Slave
 // https://qiita.com/hikoalpha/items/7bf563ee286a59bfd2f4
@@ -13,7 +13,7 @@
 
 #include <Wire.h>
 
-byte b=0;
+byte b = 0;
 
 void setup() {
   Wire.begin(8);// Slave ID #8
