@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <WireSlave.h>
+//#include <WireSlave.h>
 
 #define SLAVE_ADDR 0x1E
 #define SDA_PIN 21
@@ -38,12 +38,10 @@
 //    Serial.println(y);
 //}
 
-#include <Wire.h>
-
 byte b=0;
 
 void setup() {
-  Wire.begin(SLAVE_ADDR);// Slave ID #8
+  Wire.begin(8);// Slave ID #8
   Wire.onRequest(requestEvent);
 }
 
