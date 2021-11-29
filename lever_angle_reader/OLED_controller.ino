@@ -1,6 +1,7 @@
 #include <Wire.h>
 
-// search "SSD1306 esp32" and istall top library
+// This file requires "ESP8266 and ESP32 driver for SSD1366 displays" library.
+// 
 // detail is on following
 // https://wak-tech.com/archives/825
 // https://github.com/ThingPulse/esp8266-oled-ssd1306
