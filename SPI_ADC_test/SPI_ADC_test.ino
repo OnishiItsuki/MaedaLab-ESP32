@@ -35,10 +35,10 @@ void loop()
 
 void vspiCommand()
 {
-  digitalWrite(CS, LOW);           //対象の電子部品を接続したSS
-  SPI.transfer(StartBIT0); //valueに電子部品から受信したデータを格納
-  uint32_t value = SPI.transfer(0);
-  digitalWrite(CS, HIGH);          //通信終了
+  digitalWrite(CS, LOW); //対象の電子部品を接続したSS
+  SPI.transfer(StartBIT0);
+  uint32_t value = SPI.transfer(0); //valueに電子部品から受信したデータを格納
+  digitalWrite(CS, HIGH);           //通信終了
 
   Serial.print("read 0: ");
   Serial.println(value, HEX);
