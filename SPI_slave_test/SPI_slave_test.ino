@@ -38,6 +38,15 @@ void setup()
     slave.setQueueSize(1);  // キューサイズ　とりあえず1
     // HSPI(SPI2) のデフォルトピン番号は CS: 15, CLK: 14, MOSI: 13, MISO: 12
     slave.begin(); // 引数を指定しなければデフォルトのSPI（SPI2,HSPIを利用）
+    
+    Serial.print("[Send] ");
+    for (int i = 0; i < MSG_SIZE; i++)
+    {
+        Serial.print(s_message_buf[i]);
+    }
+    Serial.println();
+    Serial.println("Now");
+
 }
 
 void loop()
