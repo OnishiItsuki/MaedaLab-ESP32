@@ -1,6 +1,11 @@
 #include <SPI.h> // SPIライブラリを導入
 
 //変数の設定
+static const uint8_t SCK_master=14;
+static const uint8_t MISO_master=12;
+static const uint8_t MOSI_master=13;
+static const uint8_t CS_master=15;
+
 static const int MSG_SIZE = 20;  //データのサイズ（何バイト分か）
 uint8_t s_message_buf[MSG_SIZE]; //送信データバッファ用の配列
 uint8_t r_message_buf[MSG_SIZE]; //受信データバッファ用の配列
@@ -13,8 +18,9 @@ void setup()
 {
     // SPI通信とシリアル通信の初期設定
     Serial.begin(115200);
-    pinMode(SS, OUTPUT);                 // スレーブ機器を起こす
-    SPI.begin();                         // SPIの初期化
+    pinMode(SS, OUTPUT); // スレーブ機器を起こす
+
+    SPI.begin(SCK_master, MISO_master, MOSI_master, CS_master);      // SPI通信の初期化、有効化
     delay(100);                          //シリアルの起動を安定させる（要調整）
     Serial.println("SPI Master Start."); //シリアル始動のご挨拶
 
