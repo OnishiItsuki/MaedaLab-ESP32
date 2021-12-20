@@ -7,7 +7,7 @@ static const uint8_t MISO_slave = 12;
 static const uint8_t MOSI_slave = 13;
 static const uint8_t CS_slave = 15;
 
-static const uint32_t BUFFER_SIZE = 8192;
+static const uint32_t BUFFER_SIZE = 5;
 uint8_t *spi_slave_tx_buf;
 uint8_t *spi_slave_rx_buf;
 
@@ -19,8 +19,6 @@ void setup()
     spi_slave_tx_buf = slave.allocDMABuffer(BUFFER_SIZE);
     spi_slave_rx_buf = slave.allocDMABuffer(BUFFER_SIZE);
 
-    s_message_buf[0] = 24;
-
     slave.setDataMode(SPI_MODE3);
     slave.setMaxTransferSize(BUFFER_SIZE);
     slave.setDMAChannel(2); // 1 or 2 only
@@ -30,6 +28,19 @@ void setup()
     // HSPI = CS: 15, CLK: 14, MOSI: 13, MISO: 12
     // VSPI = CS: 5, CLK: 18, MOSI: 23, MISO: 19
     slave.begin(SCK_slave, MISO_slave, MOSI_slave, CS_slave);
+
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+      uint8_t rnd = random(0, 255);
+      spi_slave_tx_buf[i] = rnd;
+    }
+
+    Serial.print("Send: ");
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+      Serial.print(spi_slave_tx_buf[i]);
+      Serial.print(" ");
+    }
+    Serial.println("");
+    
 }
 
 void loop()
