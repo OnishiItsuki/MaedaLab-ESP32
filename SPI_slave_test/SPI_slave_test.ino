@@ -7,10 +7,12 @@ static const uint8_t MISO_slave=12;
 static const uint8_t MOSI_slave=13;
 static const uint8_t CS_slave=15;
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 static const int MSG_SIZE = 20;
 uint8_t *s_message_buf;
 uint8_t *r_message_buf;
 int checksum;
+int send_counter = 0;
 
 void setup()
 {
@@ -67,6 +69,7 @@ void loop()
     // バッファも自動更新される
     while (slave.available())
     {
+        Serial.println(send_counter++);
         Serial.print(" Send : ");
         for (uint32_t i = 0; i < MSG_SIZE; i++)
         {
