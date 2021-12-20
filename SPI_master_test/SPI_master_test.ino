@@ -18,7 +18,7 @@ void setup()
 {
     // SPI通信とシリアル通信の初期設定
     Serial.begin(115200);
-    pinMode(SS, OUTPUT); // スレーブ機器を起こす
+    pinMode(CS_master, OUTPUT); // スレーブ機器を起こす
 
     SPI.begin(SCK_master, MISO_master, MOSI_master, CS_master);      // SPI通信の初期化、有効化
     delay(100);                          //シリアルの起動を安定させる（要調整）
@@ -54,7 +54,7 @@ void loop()
 
     // SPI通信の開始
     SPI.beginTransaction(mySPISettings); //通信開始
-    digitalWrite(SS, LOW);               //スレーブ機器を起こす
+    digitalWrite(CS_master, LOW);               //スレーブ機器を起こす
 
     //送信の実施と同時に受信データを受信データ用配列に書き写す
     for (int i = 0; i < MSG_SIZE; i++)
@@ -94,7 +94,7 @@ void loop()
         Serial.println(uint8_t(checksum));
     }
 
-    digitalWrite(SS, HIGH); //スレーブ機器を終了
+    digitalWrite(CS_master, HIGH); //スレーブ機器を終了
     SPI.endTransaction();   // SPIを解放
-    delay(1000);
+    delay(3000);
 }
