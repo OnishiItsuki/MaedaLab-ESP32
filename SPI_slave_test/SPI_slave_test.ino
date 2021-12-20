@@ -19,6 +19,8 @@ void setup()
     spi_slave_tx_buf = slave.allocDMABuffer(BUFFER_SIZE);
     spi_slave_rx_buf = slave.allocDMABuffer(BUFFER_SIZE);
 
+    s_message_buf[0] = 24;
+
     slave.setDataMode(SPI_MODE3);
     slave.setMaxTransferSize(BUFFER_SIZE);
     slave.setDMAChannel(2); // 1 or 2 only
