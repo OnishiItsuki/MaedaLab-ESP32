@@ -1,51 +1,44 @@
-#include <SPI.h> // SPIライブラリを導入
+#include <ESP32DMASPIMaster.h>
+ESP32DMASPI::Master master;
 
-//変数の設定
 static const uint8_t SCK_master = 14;
 static const uint8_t MISO_master = 12;
 static const uint8_t MOSI_master = 13;
 static const uint8_t CS_master = 15;
 
-uint8_t send_data = 100;
-uint8_t rece_data = 0;
+static const uint32_t BUFFER_SIZE = 5;
+uint8_t* spi_master_tx_buf;
+uint8_t* spi_master_rx_buf;
 
-int counter = 0;
-
-// SPI通信設定のインスタンスを立てる
-SPISettings mySPISettings = SPISettings(6000000, MSBFIRST, SPI_MODE3);
-
-void setup()
-{
-    // SPI通信とシリアル通信の初期設定
+void setup() {
     Serial.begin(115200);
-    pinMode(CS_master, OUTPUT); // スレーブ機器を起こす
 
-    SPI.begin(SCK_master, MISO_master, MOSI_master, CS_master); // SPI通信の初期化、有効化
-    delay(100);                                                 //シリアルの起動を安定させる（要調整）
-    Serial.println("SPI Master Start.");                        //シリアル始動のご挨拶
+    // to use DMA buffer, use these methods to allocate buffer
+    spi_master_tx_buf = master.allocDMABuffer(BUFFER_SIZE);
+    spi_master_rx_buf = master.allocDMABuffer(BUFFER_SIZE);
+
+    master.setDataMode(SPI_MODE3);
+    master.setFrequency(SPI_MASTER_FREQ_8M);
+    master.setMaxTransferSize(BUFFER_SIZE);
+    master.setDMAChannel(1); // 1 or 2 only
+    master.setQueueSize(1); // transaction queue size
+
+    // begin() after setting
+    // HSPI = CS: 15, CLK: 14, MOSI: 13, MISO: 12
+    // VSPI = CS: 5, CLK: 18, MOSI: 23, MISO: 19
+    master.begin(SCK_master, MISO_master, MOSI_master, CS_master);
 }
 
-void loop()
-{
-    Serial.println(counter++); //シリアルモニタ改行
+void loop() {
+   	// set buffer data here
 
-    Serial.print("  [Send] ");
-    Serial.print(send_data);
-    Serial.println();
+    // start and wait to complete transaction
+    master.transfer(spi_master_tx_buf, spi_master_rx_buf, BUFFER_SIZE);
 
-    // SPI通信の開始
-    SPI.beginTransaction(mySPISettings); //通信開始
-    digitalWrite(CS_master, LOW);        //スレーブ機器を起こす
+    // do something here with received data (if needed)
+    for (size_t i = 0; i < BUFFER_SIZE; ++i)
+        printf("%d ", spi_master_rx_buf[i]);
+    printf("\n");
 
-    rece_data = SPI.transfer(send_data); //※送信と同時に受信データが返り値になる
-    delayMicroseconds(50);                             //送受信時間調整用のディレイ
-
-    digitalWrite(CS_master, HIGH); //スレーブ機器を終了
-    SPI.endTransaction();          // SPIを解放
-    Serial.print("Receive: ");
-    Serial.println(rece_data);
-
-    Serial.println("");
-    
-    delay(1500);
+    delay(2000);
 }
