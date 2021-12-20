@@ -2,15 +2,15 @@
 
 ESP32DMASPI::Slave slave;
 
-static const uint8_t SCK_slave=14;
-static const uint8_t MISO_slave=12;
-static const uint8_t MOSI_slave=13;
-static const uint8_t CS_slave=15;
+static const uint8_t SCK_slave = 14;
+static const uint8_t MISO_slave = 12;
+static const uint8_t MOSI_slave = 13;
+static const uint8_t CS_slave = 15;
 
-static const int MSG_SIZE = 20;
+static const int MSG_SIZE = 1;
 uint8_t *s_message_buf;
 uint8_t *r_message_buf;
-int checksum;
+// int checksum;
 
 void setup()
 {
@@ -28,14 +28,14 @@ void setup()
     memset(r_message_buf, 0, MSG_SIZE);
 
     //送信データを作成してセット
-    checksum = 0;
-    for (int i = 0; i < MSG_SIZE - 1; i++) //配列の末尾以外をデータを入れる
-    {
-        uint8_t rnd = random(0, 255);
-        s_message_buf[i] = rnd;
-        checksum += rnd; //チェックサムを加算
-    }
-    s_message_buf[MSG_SIZE - 1] = uint8_t(checksum & 0xFF ^ 0xFF); //データ末尾にチェックサムにする
+    // checksum = 0;
+    // for (int i = 0; i < MSG_SIZE - 1; i++) //配列の末尾以外をデータを入れる
+    // {
+    //     uint8_t rnd = random(0, 255);
+    //     s_message_buf[i] = rnd;
+    //     checksum += rnd; //チェックサムを加算
+    // }
+    // s_message_buf[MSG_SIZE - 1] = uint8_t(checksum & 0xFF ^ 0xFF); //データ末尾にチェックサムにする
 
     slave.setDataMode(SPI_MODE3);
     slave.setMaxTransferSize(MSG_SIZE);
@@ -43,15 +43,6 @@ void setup()
     slave.setQueueSize(1);  // キューサイズ　とりあえず1
     // HSPI(SPI2) のデフォルトピン番号は CS: 15, CLK: 14, MOSI: 13, MISO: 12
     slave.begin(SCK_slave, MISO_slave, MOSI_slave, CS_slave); // 引数を指定しなければデフォルトのSPI（SPI2,HSPIを利用）
-    
-    Serial.print("[Send] ");
-    for (int i = 0; i < MSG_SIZE; i++)
-    {
-        Serial.print(s_message_buf[i]);
-    }
-    Serial.println();
-    Serial.println("Now");
-
 }
 
 void loop()
@@ -85,26 +76,6 @@ void loop()
         Serial.println();
         slave.pop(); //トランザクションを終了するコマンドらしい
 
-        //受信データのチェックサム確認
-        checksum = 0;
-        for (int i = 0; i < MSG_SIZE - 1; i++)
-        { //受信データの末尾-1番までの値を合計
-            checksum += int(r_message_buf[i]);
-        }
-        checksum = (checksum ^ 0xff) & 0xff; //合計値を反転し、下位2バイトを取得
-        Serial.print(" cksum: ");
-        Serial.println(uint8_t(r_message_buf[MSG_SIZE - 1]));
-
-        if (uint8_t(checksum) == uint8_t(r_message_buf[MSG_SIZE - 1]))
-        {
-            Serial.print("   OK!: ");
-            Serial.println(uint8_t(checksum));
-        }
-        else
-        {
-            Serial.print("**ERR*: ");
-            Serial.println(uint8_t(checksum));
-        }
         Serial.println();
     }
 }
