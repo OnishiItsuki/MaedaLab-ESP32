@@ -12,6 +12,7 @@ static const int MSG_SIZE = 1;
 uint8_t *s_message_buf;
 uint8_t *r_message_buf;
 // int checksum;
+int counter = 0;
 
 void setup()
 {
@@ -38,9 +39,11 @@ void setup()
     // }
     // s_message_buf[MSG_SIZE - 1] = uint8_t(checksum & 0xFF ^ 0xFF); //データ末尾にチェックサムにする
 
+    s_message_buf[0] = 24;
+
     slave.setDataMode(SPI_MODE3);
     slave.setMaxTransferSize(MSG_SIZE);
-    slave.setDMAChannel(2); // 専用メモリの割り当て（1か2のみ)
+    slave.setDMAChannel(0); // 専用メモリの割り当て（1か2のみ)
     slave.setQueueSize(1);  // キューサイズ　とりあえず1
     // HSPI(SPI2) のデフォルトピン番号は CS: 15, CLK: 14, MOSI: 13, MISO: 12
     slave.begin(SCK_slave, MISO_slave, MOSI_slave, CS_slave); // 引数を指定しなければデフォルトのSPI（SPI2,HSPIを利用）
@@ -59,6 +62,7 @@ void loop()
     // バッファも自動更新される
     while (slave.available())
     {
+        Serial.println(counter++);
         Serial.print(" Send : ");
         for (uint32_t i = 0; i < MSG_SIZE; i++)
         {
