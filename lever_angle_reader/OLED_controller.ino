@@ -1,10 +1,11 @@
-#include <Wire.h>
-
 // This file requires "ESP8266 and ESP32 driver for SSD1366 displays" library.
-// 
+
 // detail is on following
 // https://wak-tech.com/archives/825
 // https://github.com/ThingPulse/esp8266-oled-ssd1306
+
+#include <Wire.h>
+
 #include <SSD1306.h>
 
 #ifndef SDA_PNT
