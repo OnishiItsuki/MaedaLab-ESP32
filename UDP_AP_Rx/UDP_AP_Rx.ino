@@ -50,7 +50,7 @@ void loop() {
   if (udp.parsePacket()) {
     udp.read(c, 8);
     for (int i = 0; i < 8; i++) {
-      buffer[i] = (c[i]);
+      pwmBuffer[i] = (uint8_t)(c[i]);
     }
     check_values();
 

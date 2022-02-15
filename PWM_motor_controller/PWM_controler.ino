@@ -5,9 +5,9 @@
 #include <Ticker.h>
 
 #define START_BYTE 0x0f
-#define SAMPLING_PERIOD 5.0f  // scale is ms
-#define BYTE_A 2*(i-1)
-#define BYTE_B 2*(i-1)+1
+#define SAMPLING_PERIOD 5.0f // scale is ms
+#define BYTE_A 2 * (i - 1)
+#define BYTE_B 2 * (i - 1) + 1
 
 // set output pins
 // right side
@@ -25,20 +25,20 @@
 #define leftWheelOutA 33
 #define leftWheelOutB 32
 
-uint8_t PWM_buffer[8];  // This list stock input signal
+int pwmBufferSize = 8;
+uint8_t pwmBuffer[pwmBufferSize]; // This list stock input signal
 
-int outputBuffer[12];  // This list hold Duty ratio on each pins
-int pwmProcessFlag = 0;  // This is the index of waiting sinal
-
+int outputBuffer[12];        // This list hold Duty ratio on each pins
+bool pwmProcessFlag = false; // This is the index of waiting signal
 
 Ticker ticker;
-
 
 // set duty ratio on each pins
 void set_output(void)
 {
   Serial.println("run set_output func");
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < 12; i++)
+  {
     ledcWrite(i, outputBuffer[i]);
     Serial.print(i);
     Serial.print(": ");
@@ -46,13 +46,15 @@ void set_output(void)
   }
 }
 
-
 void pin_init()
 {
   // initialize pins
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < 12; i++)
+  {
     ledcSetup(i, 115200, 7);
   }
+
+  // set pair of pin and indexies of outputBuffer
   ledcAttachPin(boomOutA, 0);
   ledcAttachPin(boomOutB, 1);
   ledcAttachPin(armOutA, 2);
@@ -67,42 +69,49 @@ void pin_init()
   ledcAttachPin(leftWheelOutB, 11);
 
   // initial state is free run
-  for (int i = 0; i < 8; i++) {
-    PWM_buffer[i] = 0;
+  for (int i = 0; i < 8; i++)
+  {
+    pwmBuffer[i] = 0;
   }
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++)
+  {
     outputBuffer[BYTE_A] = 0;
     outputBuffer[BYTE_B] = 0;
   }
   set_output();
 }
 
-
-//  control whitch pins (A or B) are LOW or HIGH on each DoF.
+//  control witch pins (A or B) are LOW or HIGH on each DoF.
 //  outputBuffer that is HIGH pin holds duty ratio.
 void PWM_processor(void)
 {
-  if (pwmProcessFlag == 0) {
+  if (pwmProcessFlag == false)
+  {
     return;
-  } else {
-    for (int i = 1; i < 7; i++) {
-      // buffer[0] is start byte, so input signals start from 1
-      // Both pins is LOW when buffer is 0 or 128.
-      if ((int)(buffer[i]) >= 128) {
+  }
+  else
+  {
+    for (int i = 1; i < 7; i++)
+    {
+      // pwmBuffer[0] is start byte, so input signals start from 1
+      // Both pins is LOW when pwmBuffer is 0 or 128.
+      if ((int)(pwmBuffer[i]) >= 128)
+      {
         outputBuffer[BYTE_A] = 0;
-        outputBuffer[BYTE_B] = (int)(buffer[i] - 128);
-      } else {
-        outputBuffer[BYTE_A] = (int)(buffer[i]);
+        outputBuffer[BYTE_B] = (int)(pwmBuffer[i] - 128);
+      }
+      else
+      {
+        outputBuffer[BYTE_A] = (int)(pwmBuffer[i]);
         outputBuffer[BYTE_B] = 0;
       }
-      buffer[i] = 0;
+      pwmBuffer[i] = 0;
     }
     set_output();
-    pwmProcessFlag = 0;
+    pwmProcessFlag = false;
     Serial.println("set outputs");
   }
 }
-
 
 void PWM_init()
 {
@@ -114,33 +123,49 @@ void PWM_init()
   delay(5);
 }
 
-
-int check_values()
+bool check_PMW_input_rules()
 {
-  if (buffer[0] != START_BYTE) {
+  if (pwmBuffer[0] != START_BYTE)
+  {
     Serial.println("start byte ERROR");
-    return 0;
+    return false;
   }
 
   //  check parity
-  uint8_t serialXOR = buffer[1];
-  for (int i = 2; i <= 6; i++) {
-    serialXOR ^= buffer[i];
+  uint8_t serialXOR = pwmBuffer[1];
+  for (int i = 2; i <= 6; i++)
+  {
+    serialXOR ^= pwmBuffer[i];
   }
-  if (serialXOR != buffer[7]) {
+  if (serialXOR != pwmBuffer[7])
+  {
     Serial.print("parity byte ERROR: XOR is ");
     Serial.print(serialXOR);
     Serial.print(", buffer byte is ");
-    Serial.println(buffer[7]);
-    return 0;
+    Serial.println(pwmBuffer[7]);
+    return false;
   }
 
   Serial.println("print Buffer array");
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++)
+  {
     Serial.print(i);
     Serial.print(": ");
-    Serial.println(buffer[i]);
+    Serial.println(pwmBuffer[i]);
   }
-  pwmProcessFlag = 1;
-  return 1;
+  return true;
+}
+
+bool check_received_valuse()
+{
+  bool check_result = check_PMW_input_rules();
+  if (check_result)
+  {
+    pwmProcessFlag = true;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
