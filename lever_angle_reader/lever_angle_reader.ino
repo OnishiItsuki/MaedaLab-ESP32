@@ -18,7 +18,7 @@
 #define SIGNAL_LED_PIN 25
 #define NUM_CH 6;
 
-uint8_t voltage_buffer[num_ch];
+int voltage_buffer[num_ch];
 
 // step 1
 void setup()
@@ -36,7 +36,6 @@ void setup()
 
 void loop()
 {
-  send_read_signal_to_ADC();  // step 2, ADC_controller
-  read_voltage_from_ADC(voltage_buffer);  // step 3, ADC_controller
+  read_voltage_from_ADC(voltage_buffer);  // step 2 and 3, ADC_controller
   send_udp_signal(voltage_buffer);  // step 4 and 5, UDP_Tx
 }
