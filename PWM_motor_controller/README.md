@@ -53,7 +53,7 @@ START BYTEと6chの制御信号，PARITY BYTEで構成されます．\
 PARITY BYTEは全制御信号のXORとなります．
 制御信号は先頭1bitでモータの回転方向，残り7bitで速度を制御します．
 
-"Pulse_design.xlsx"にも情報があるので，合わせてご覧ください．
+詳しくは"Pulse_design.xlsx"をご覧ください．
 
 
 ## 関数リスト

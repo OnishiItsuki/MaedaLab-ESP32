@@ -21,30 +21,41 @@
 #define DISP_HEIGHT 64
 #define FONT ArialMT_Plain_16
 
-SSD1306  display(OLED_ADDR, SDA_PIN, SCL_PIN);
+SSD1306 display(OLED_ADDR, SDA_PIN, SCL_PIN);
 
-void OLED_init() {
+void OLED_init()
+{
   disp_all_pixel();
   delay(1000);
   disp_init();
 }
 
-void disp_init() {
+void disp_init()
+{
   display.init();
   display.setFont(FONT);
 }
 
-void disp_clear() {
+void disp_clear()
+{
   disp_init();
 }
 
-void disp_all_pixel() {
+void disp_all_pixel()
+{
   display.init();
   display.fillRect(0, 0, DISP_WIDTH, DISP_HEIGHT);
   display.display();
 }
 
-void disp_add_string(int16_t x, int16_t y, String message) {
+void disp_add_string(int16_t x, int16_t y, String message)
+{
   display.drawString(x, y, message);
   display.display();
+}
+
+void disp_show_string(int16_t x, int16_t, y, String message)
+{
+  disp_clear();
+  disp_add_string(x, y, message)
 }

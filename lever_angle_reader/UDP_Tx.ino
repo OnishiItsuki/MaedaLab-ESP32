@@ -1,102 +1,105 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
+static const int buffer_size = NUM_CH + 2;
+static uint8_t start_bit = 0x0f;
+uint8_t signal_buffer[buffer_size];
+int reconnection_span_ms = 500;
+
+// WiFi settings
 const char ssid[] = "ESP32_AP";
 const char password[] = "esp32pass";
-
 static WiFiUDP udp;
-static const char *RxIP = "192.168.4.13";
+static const char RxIP[] = "192.168.4.13";
 static const int RxPort = 10000;
 static const int localPort = 5000;
 
-uint8_t start_byte = 0x0f;
-uint8_t boom_byte = 10;
-uint8_t arm_byte = 50;
-uint8_t bucket_byte = 100;
-uint8_t slewing_byte = 138;
-uint8_t r_wheel_byte = 178;
-uint8_t l_wheel_byte = 228;
-uint8_t parity_byte = 0x00;
-
-uint8_t buffer[8];
-
-static void Wifi_setup()
+static void Wifi_setup(Sting message)
 {
   Serial.print("Connecting to ");
   Serial.print(ssid);
   Serial.print("  , ID is ");
   Serial.println(RxIP);
 
+  int counter = 0;
   WiFi.begin(ssid, password);
-  while ( WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(reconnection_span_ms);
     Serial.print(".");
+
+    disp_clear();
+    disp_add_string(10, 10, message);
+    int disconnected_time = counter / (1000 / reconnection_span_ms);
+    disp_add_string(10, 30, (String)disconnected_time);
+    conter++;
   }
 }
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
-
+void UDP_init()
+{
   // WiFi setup
-  Wifi_setup();
+  Wifi_setup("WiFi connecting.");
   udp.begin(localPort);
 
-  Serial.println("\n\n **************************");
-  Serial.println(" * Connected Successfully *");
-  Serial.println(" **************************");
+  Serial.println("\n\n ********************* ");
+  Serial.println(" Connection Successful ");
+  Serial.println(" ********************* ");
   Serial.println("");
-  Serial.print(" My ip address is : ");   Serial.println(RxIP);
-  Serial.print(" My port numper is : ");  Serial.println(RxPort);
+  Serial.print(" My ip address is : ");
+  Serial.println(RxIP);
+  Serial.print(" My port numper is : ");
+  Serial.println(RxPort);
   Serial.println("");
+
+  disp_clear();
+  disp_add_string(10, 10, "WiFi connection successful");
+  String ip_port = (String)RxIP;
+  ip_port.append(":");
+  ip_port.append((String)RXPort);
+  disp_add_string(10, 30, ip_port);
 }
 
-static void AD_converter()
+uint8_t compute_parity(uint8_t buffer[]) // signal_buffer[buffer_size]
 {
-  // TODO: make AD converter
-  // Now put test value into buffer for test
-  buffer[0] = start_byte;
-  buffer[1] = boom_byte;
-  buffer[2] = arm_byte;
-  buffer[3] = bucket_byte;
-  buffer[4] = slewing_byte;
-  buffer[5] = r_wheel_byte;
-  buffer[6] = l_wheel_byte;
-}
+  // initialize parity bit
+  buffer[buffer_size - 1] = 0;
 
-static unsigned int comp_parity()
-{
-  // initialize parity buffer
-  buffer[7] = 0;
-
-  //  compute parity buffer
-  uint8_t tmp = buffer[1];
-  for (int i = 2; i < 7; i++) {
-    tmp ^= buffer[i];
+  //  compute parity bit
+  uint8_t parity_bit = buffer[1];
+  for (int i = 2; i < buffer_size - 1; i++)
+  {
+    parity_bit ^= buffer[i];
   }
-  return tmp;
+  return parity_bit;
 }
 
-void loop()
+void generate_udp_signal_from_volrage(uint8_t voltage[]) // voltage_buffer[NUM_CH]
 {
-  AD_converter();
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Disconnected");
-    Wifi_setup();
-  } else {
-    buffer[7] = comp_parity();
+  signal_buffer[0] = start_bit;
+  for (int i = 1; i < buffer_size - 1; i++)
+  {
+    signal_signal[i] = voltage[i];
+  }
+  signal_buffer[buffer_size - 1] = compute_parity(voltage);
+}
 
+void send_udp_signal(uint8_t voltage[]) // voltage_buffer[NUM_CH]
+{
+  generate_udp_signal_from_volrage(voltage);
+
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("WiFi disconnected. Reconnecting");
+    Wifi_setup("WiFi disconnected. Reconnecting");
+  }
+  else
+  {
     udp.beginPacket(RxIP, RxPort);
-    for (int i = 0; i < 8; i++) {
-      udp.write(buffer[i]);    //packet sending
+    for (int i = 0; i < buffer_size; i++)
+    {
+      udp.write(signal_buffer[i]); // send packet
     }
     udp.endPacket();
-
-    Serial.println("print Buffer array");
-    for (int i = 0; i < 8; i++) {
-      Serial.println(buffer[i]); // to separate line
-    }
-
-    delay(1000);
   }
 }

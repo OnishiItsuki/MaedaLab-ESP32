@@ -1,35 +1,42 @@
-//2021/11/01
-//Itsuki Onishi
-//onishi.itsuki@ist.osaka-u.ac.jp
+// 2021/11/01
+// Itsuki Onishi
+// onishi.itsuki@ist.osaka-u.ac.jp
 //
-//This is conroling program of
-//  * AD converter (LTC2309)
-//  * OLED display (SSD1306)
-//  * SIGNAL LED
-//for ESP32.
-//At first, include package for ESP32.
-//See: https://github.com/espressif/arduino-esp32
-//     https://dandydot.no-ip.biz/~dot/presen/advtech/seminars/iot_workshop/install-esp32-board-manager/README.md.html
-
+// This is conroling program of
+//   * AD converter (LTC2309)
+//   * OLED display (SSD1306)
+//   * SIGNAL LED
+// for ESP32.
+// At first, include package for ESP32.
+// See: https://github.com/espressif/arduino-esp32
+//      https://dandydot.no-ip.biz/~dot/presen/advtech/seminars/iot_workshop/install-esp32-board-manager/README.md.html
 
 #include <Arduino.h>
 
 #define SDA_PIN 21
 #define SCL_PIN 22
 #define SIGNAL_LED_PIN 25
+#define NUM_CH 6;
 
-void setup() {
+uint8_t voltage_buffer[num_ch];
+
+// step 1
+void setup()
+{
+#Serial initialization must be located before device initialization process.
+  Serial.begin(115200);
+  Serial.println();
+
+#device initialization
+  ADC_init();
   LED_init();
   OLED_init();
+  UDP_init();
 }
 
-void loop() {
-  disp_add_string(0, 0, "test2");
-  disp_add_string(0, 20, "test3");
-  led_on();
-  delay(1000);
-
-  disp_clear();
-  led_off();
-  delay(1000);
+void loop()
+{
+  send_read_signal_to_ADC();  // step 2, ADC_controller
+  read_voltage_from_ADC(voltage_buffer);  // step 3, ADC_controller
+  send_udp_signal(voltage_buffer);  // step 4 and 5, UDP_Tx
 }
