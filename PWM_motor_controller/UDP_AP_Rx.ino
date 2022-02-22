@@ -13,7 +13,7 @@ WiFiUDP udp;
 static const uint8_t start_BYTE = 0x0f;
 int signal_size = NUM_CH + 2;
 
-static void Wifi_setup()
+static void WiFi_init()
 {
   // setup ESP32 as Access Point
   WiFi.mode(WIFI_STA);
@@ -25,7 +25,7 @@ static void Wifi_setup()
   Serial.println("AP IP address: " + myIP.toString());
 }
 
-static void UDP_setup()
+static void UDP_init()
 {
   Serial.println("Starting UDP");
   int ret = udp.begin(HOST_PORT);
@@ -35,38 +35,38 @@ static void UDP_setup()
   Serial.println(HOST_PORT);
 }
 
-uint8_t _compute_parity()
+uint8_t _compute_parity(uint8_t input_signal[]) // signal_buffer[signal_size]
 {
   uint8_t signal_XOR = 0;
   for (int i = 1; i < signal_size - 1; i++)
   {
-    signal_XOR ^= pwmBuffer[i];
+    signal_XOR ^= input_signal[i];
   }
   return signal_XOR
 }
 
-bool _check_signal_rules(uint8_t signal[]) // signal_buffer[signal_size]
+bool _check_signal_rules(uint8_t input_signal[]) // signal_buffer[signal_size]
 {
-  if (signal[0] != start_BYTE)
+  if (input_signal[0] != start_BYTE)
   {
     Serial.println("start byte ERROR");
     return false;
   }
 
   uint8_t signal_XOR = _compute_parity();
-  if (signal_XOR == pwmBuffer[signal_size - 1])
+  if (signal_XOR == input_signal[signal_size - 1])
   {
     Serial.print("parity byte: XOR is ");
     Serial.print(signal_XOR);
     Serial.print(", buffer byte is ");
-    Serial.println(pwmBuffer[7]);
+    Serial.println(input_signal[signal_size - 1]);
     return false;
   }
 
   return true;
 }
 
-bool receive_signal(uint8_t signal_buffer[]) // PWM_signal[NUM_CH]
+bool receive_signal(uint8_t signal_buffer[]) // PWM_signal[NUM_CH], step2
 {
   // receive signals using UDP
   char c[1024];

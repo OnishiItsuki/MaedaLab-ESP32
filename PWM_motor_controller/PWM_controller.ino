@@ -85,26 +85,26 @@ void PWM_init()
 
 //  control witch pins (A or B) are LOW or HIGH on each DoF.
 //  control_signal_buffer that is HIGH pin holds duty ratio.
-void compute_motor_controll_signals(uint8_t input_signal[]) // PWM_signal[NUM_CH], step3
+void compute_motor_control_signals(uint8_t input_signal[]) // PWM_signal[NUM_CH], step3
 {
   for (int i = 0; i < NUM_CH; i++)
   {
     // Both pins is LOW when signal_buffer is 0 (free).
     // When input signal is 128, this process send motor stop signal.
-    if ((int)(input_signal[i]) > 128)
-    {
-      control_input_signal[BYTE_A] = 0;
-      control_input_signal[BYTE_B] = (int)(signal_buffer[i] - 128);
-    }
-    else if ((int)(input_signal[i]) == 128))
-      {
-        control_input_signal[BYTE_A] = 128;
-        control_input_signal[BYTE_B] = 128;
-      }
-    else
+    if ((int)(input_signal[i]) < 128)
     {
       control_input_signal[BYTE_A] = (int)(signal_buffer[i]);
       control_input_signal[BYTE_B] = 0;
+    }
+    else if ((int)(input_signal[i]) == 128))
+      {
+        control_input_signal[BYTE_A] = 127;
+        control_input_signal[BYTE_B] = 127;
+      }
+    else
+    {
+      control_input_signal[BYTE_A] = 0;
+      control_input_signal[BYTE_B] = (int)(signal_buffer[i] - 128);
     }
   }
 }

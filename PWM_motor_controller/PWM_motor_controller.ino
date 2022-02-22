@@ -21,8 +21,8 @@ void setup()
 
     // device initialization
     PWM_init();
-    Wifi_setup();
-    UDP_setup();
+    WiFi_init();
+    UDP_init();
 }
 
 void _set_basic_signal()
@@ -41,11 +41,11 @@ void loop()
     // step3
     if (check_result)
     {
-        compute_motor_controll_signals(PWM_signal);
+        compute_motor_control_signals(PWM_signal);
     }
     else
     {
         _set_basic_signal();
-        compute_motor_controll_signals(PWM_signal);
+        compute_motor_control_signals(PWM_signal);
     }
 }
