@@ -24,19 +24,8 @@ const static int font_size_height = 20;
 const static int disp_width = 128;
 const static int disp_height = 64;
 
-static const max_num_char_width = disp_width / font_size_width;
-static const max_num_line = disp_height / font_size_height;
-
-
-SSD1306 display(OLED_ADDR, SDA_PIN, SCL_PIN);
-
-void OLED_init()
-{
-const static int font_size_width = 10;
-
-const static int disp_width = 128;
-const static int disp_height = 64;
-static const max_num_char_width = disp_width / font_size_width;
+static const int max_num_char_width = disp_width / font_size_width;
+static const int max_num_line = disp_height / font_size_height;
 
 
 SSD1306 display(OLED_ADDR, SDA_PIN, SCL_PIN);
@@ -106,6 +95,6 @@ void disp_show_string(String message) // TODO: debug
 
   if (line_index > max_num_line)
   {
-    Serial.println("Waring: String on display may be cut off and not be displayed correctly.")
+    Serial.println("Waring: String on display may be cut off and not be displayed correctly.");
   }
 }
