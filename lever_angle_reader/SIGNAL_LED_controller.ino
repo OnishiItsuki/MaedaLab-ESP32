@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #ifndef SIGNAL_LED_PIN
 #define SIGNAL_LED_PIN 27
 #endif

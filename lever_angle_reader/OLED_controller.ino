@@ -5,8 +5,6 @@
 // https://github.com/ThingPulse/esp8266-oled-ssd1306
 
 #include <Wire.h>
-#include <assert.h>
-
 #include <SSD1306.h>
 
 #ifndef SDA_PNT
