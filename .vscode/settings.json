@@ -25,6 +25,12 @@
         "limits": "cpp"
     },
     "cSpell.words": [
-        "OLED"
+        "disp",
+        "Itsuki",
+        "ledc",
+        "OLED",
+        "Onishi",
+        "SSID",
+        "WROVER"
     ]
 }

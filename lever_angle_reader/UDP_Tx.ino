@@ -1,37 +1,37 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-static const int buffer_size = NUM_CH + 2;
-static uint8_t start_bit = 0x0f;
-uint8_t signal_buffer[buffer_size];
-int reconnection_span_ms = 500;
-
 // WiFi settings
-const char ssid[] = "ESP32_AP";
-const char password[] = "esp32pass";
+#define SSID "ESP32_AP"
+#define PASSWORD "esp32pass"
+#define HOST_IP "192.168.4.13"
+#define HOST_PORT 10000
+#define CLIENT_PORT 5000
+#define RECONNECTION_SPAN_MS 500
 static WiFiUDP udp;
-static const char RxIP[] = "192.168.4.13";
-static const int RxPort = 10000;
-static const int localPort = 5000;
+
+static const int signal_size = NUM_CH + 2;
+static const uint8_t start_BYTE = 0x0f;
+uint8_t signal_buffer[signal_size];
 
 static void _Wifi_setup(Sting message)
 {
   Serial.println(message);
   Serial.print("Connecting to ");
-  Serial.print(ssid);
+  Serial.print(SSID);
   Serial.print("  , ID is ");
-  Serial.println(RxIP);
+  Serial.println(HOST_IP);
 
   int counter = 0;
-  WiFi.begin(ssid, password);
+  WiFi.begin(SSID, PASSWORD);
   while (WiFi.status() != WL_CONNECTED)
   {
-    delay(reconnection_span_ms);
+    delay(RECONNECTION_SPAN_MS);
     Serial.print(".");
 
     disp_clear();
     disp_add_string(10, 10, message);
-    int disconnected_time = counter / (1000 / reconnection_span_ms);
+    int disconnected_time = counter / (1000 / RECONNECTION_SPAN_MS);
     disp_add_string(10, 30, (String)disconnected_time);
     conter++;
   }
@@ -39,7 +39,7 @@ static void _Wifi_setup(Sting message)
 
 void _signal_buffer_init()
 {
-  for (int i = 0; i < buffer_size; i++)
+  for (int i = 0; i < signal_size; i++)
   {
     signal_buffer[i] = 0;
   }
@@ -51,23 +51,23 @@ void UDP_init()
 
   // WiFi setup
   _Wifi_setup("WiFi connecting.");
-  udp.begin(localPort);
+  udp.begin(CLIENT_PORT);
 
   Serial.println("\n\n ********************* ");
   Serial.println(" Connection Successful ");
   Serial.println(" ********************* ");
   Serial.println("");
   Serial.print(" My ip address is : ");
-  Serial.println(RxIP);
+  Serial.println(HOST_IP);
   Serial.print(" My port numper is : ");
-  Serial.println(RxPort);
+  Serial.println(CLIENT_PORT);
   Serial.println("");
 
   disp_clear();
   disp_add_string(10, 10, "WiFi connection successful");
-  String ip_port = String(RxIP);
+  String ip_port = String(HOST_IP);
   ip_port.append(":");
-  ip_port.append(String(RXPort));
+  ip_port.append(String(HOST_PORT));
   disp_add_string(10, 30, ip_port);
 }
 
@@ -77,28 +77,30 @@ uint8_t _compute_signal_value_from_voltage(int voltage_value) // voltage[i], ste
   return (uint8_t)voltage_value;
 }
 
-uint8_t _compute_parity(uint8_t buffer[]) // signal_buffer[buffer_size]
+uint8_t _compute_parity(uint8_t buffer[]) // signal_buffer[signal_size]
 {
-  // initialize parity bit
-  buffer[buffer_size - 1] = 0;
-
   //  compute parity bit
-  uint8_t parity_bit = 0;
-  for (int i = 1; i < buffer_size - 1; i++)
+  uint8_t parity_byte = 0;
+  for (int i = 1; i < signal_size - 1; i++)
   {
-    parity_bit ^= buffer[i];
+    parity_byte ^= buffer[i];
   }
-  return parity_bit;
+  return parity_byte;
 }
 
 void _generate_udp_signal_from_volrage(int voltage[]) // voltage_buffer[NUM_CH], step4
 {
-  signal_buffer[0] = start_bit;
-  for (int i = 1; i < buffer_size - 1; i++)
+  // set start byte
+  signal_buffer[0] = start_BYTE;
+
+  // set observed values
+  for (int i = 1; i < signal_size - 1; i++)
   {
     signal_signal[i] = _compute_signal_value_from_voltage(voltage[i]);
   }
-  signal_buffer[buffer_size - 1] = _compute_parity(voltage);
+
+  // set parity byte
+  signal_buffer[signal_size - 1] = _compute_parity(voltage);
 }
 
 void _send_signal() // step5
@@ -110,8 +112,8 @@ void _send_signal() // step5
   }
   else
   {
-    udp.beginPacket(RxIP, RxPort);
-    for (int i = 0; i < buffer_size; i++)
+    udp.beginPacket(HOST_IP, HOST_PORT);
+    for (int i = 0; i < signal_size; i++)
     {
       udp.write(signal_buffer[i]); // send packet
     }

@@ -10,9 +10,6 @@
 #endif
 
 #define MAX_SLAVE_RESPONSE_LENGTH 3
-
-// ADC wait 7bit address but Wire.h send 16bit.
-// Following implementation may have bugs.
 #define ADC_ADDR 0x08
 
 void ADC_init()

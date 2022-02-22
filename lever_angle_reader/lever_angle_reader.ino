@@ -1,8 +1,8 @@
-// 2021/11/01
+// 2021/02/22
 // Itsuki Onishi
 // onishi.itsuki@ist.osaka-u.ac.jp
 //
-// This is conroling program of
+// This is conrolling program of
 //   * AD converter (LTC2309)
 //   * OLED display (SSD1306)
 //   * SIGNAL LED
@@ -15,19 +15,20 @@
 
 #define SDA_PIN 21
 #define SCL_PIN 22
-#define SIGNAL_LED_PIN 25
-#define NUM_CH 6;
+#define SIGNAL_LED_PIN 27
+#define NUM_CH 6
 
-int voltage_buffer[num_ch];
+int voltage_buffer[NUM_CH];
 
 // step 1
 void setup()
 {
-#Serial initialization must be located before device initialization process.
+  // Serial initialization must be located before device initialization process because
+  // functions in the other files use Serial communication.
   Serial.begin(115200);
   Serial.println();
 
-#device initialization
+  // device initialization
   ADC_init();
   LED_init();
   OLED_init();
@@ -36,6 +37,6 @@ void setup()
 
 void loop()
 {
-  read_voltage_from_ADC(voltage_buffer);  // step 2 and 3, ADC_controller
-  send_udp_signal(voltage_buffer);  // step 4 and 5, UDP_Tx
+  read_voltage_from_ADC(voltage_buffer); // step 2 and 3, ADC_controller
+  send_udp_signal(voltage_buffer);       // step 4 and 5, UDP_Tx
 }

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #ifndef SIGNAL_LED_PIN
-#define SIGNAL_LED_PIN 25
+#define SIGNAL_LED_PIN 27
 #endif
 
 void LED_init()

@@ -5,6 +5,7 @@
 // https://github.com/ThingPulse/esp8266-oled-ssd1306
 
 #include <Wire.h>
+#include <assert.h>
 
 #include <SSD1306.h>
 
@@ -17,16 +18,28 @@
 #endif
 
 #define OLED_ADDR 0x3c
-#define DISP_WIDTH 128
-#define DISP_HEIGHT 64
 #define FONT ArialMT_Plain_16
 
-#define FONT_SIZE_HEIGHT 20
-#define FONT_SIZE_WIDTH 10
-static const max_num_char_width = DISP_WIDTH / FONT_SIZE_WIDTH;
+const static int font_size_width = 10;
+const static int font_size_height = 20;
 
-static const indent_x = 5;
-static const indent_y = 5;
+const static int disp_width = 128;
+const static int disp_height = 64;
+
+static const max_num_char_width = disp_width / font_size_width;
+static const max_num_line = disp_height / font_size_height;
+
+
+SSD1306 display(OLED_ADDR, SDA_PIN, SCL_PIN);
+
+void OLED_init()
+{
+const static int font_size_width = 10;
+
+const static int disp_width = 128;
+const static int disp_height = 64;
+static const max_num_char_width = disp_width / font_size_width;
+
 
 SSD1306 display(OLED_ADDR, SDA_PIN, SCL_PIN);
 
@@ -51,7 +64,7 @@ void disp_clear()
 
 void disp_all_pixel()
 {
-  display.fillRect(0, 0, DISP_WIDTH, DISP_HEIGHT);
+  display.fillRect(0, 0, disp_width, disp_height);
   display.display();
 }
 
@@ -64,15 +77,15 @@ void disp_add_string(int16_t x, int16_t y, String message)
 void disp_show_string(String message) // TODO: debug
 {
   disp_clear();
-  int line_index = 0;
 
-  int str_index = 0;
-  while (str_index < message.length())
+  int line_index = 0;
+  int str_pointer_of_line_head = 0;
+  while (str_pointer_of_line_head < message.length())
   {
     String string_line = "";
     for (int i = 0; i < max_num_char_width; i++)
     {
-      static int pointer = str_index + i;
+      static int pointer = str_pointer_of_line_head + i;
       char char1 = message.charAt(pointer);
       char char2 = message.charAt(pointer + 1);
 
@@ -85,10 +98,16 @@ void disp_show_string(String message) // TODO: debug
         string_line += message[pointer];
       }
 
-      int16_t y = indent_y + (FONT_SIZE_HEIGHT * line_index);
-      disp_add_string(indent_x, y, string_line);
-      str_index = pointer + 2;
-    }
+      int16_t y = font_size_height * line_index;
+      disp_add_string(0, y, string_line);
 
+      line_index++;
+      str_pointer_of_line_head = pointer + 2;
+    }
+  }
+
+  if (line_index > max_num_line)
+  {
+    Serial.println("Waring: String on display may be cut off and not be displayed correctly.")
   }
 }
