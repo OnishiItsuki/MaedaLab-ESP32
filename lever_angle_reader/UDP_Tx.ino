@@ -14,7 +14,7 @@ static const int signal_size = NUM_CH + 2;
 static const uint8_t start_BYTE = 0x0f;
 uint8_t signal_buffer[signal_size];
 
-static void _Wifi_setup(Sting message)
+void _Wifi_setup(Sting message)
 {
   Serial.println(message);
   Serial.print("Connecting to ");

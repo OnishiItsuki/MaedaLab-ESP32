@@ -61,36 +61,29 @@ void disp_add_string(int16_t x, int16_t y, String message)
   display.display();
 }
 
-void disp_show_string(String message) // TODO: debug
+
+void disp_show_string(String message)
 {
   disp_clear();
 
   int line_index = 0;
   int str_pointer_of_line_head = 0;
+  int pointer;
+  String string_line;
+  
   while (str_pointer_of_line_head < message.length())
   {
-    String string_line = "";
+    string_line = "";
     for (int i = 0; i < max_num_char_width; i++)
     {
-      static int pointer = str_pointer_of_line_head + i;
-      char char1 = message.charAt(pointer);
-      char char2 = message.charAt(pointer + 1);
-
-      if (char1 == '\\' and char2 == 'n')
-      {
-        break;
-      }
-      else
-      {
-        string_line += message[pointer];
-      }
-
-      int16_t y = font_size_height * line_index;
-      disp_add_string(0, y, string_line);
-
-      line_index++;
-      str_pointer_of_line_head = pointer + 2;
+      pointer = str_pointer_of_line_head + i;
+      string_line += message[pointer];
     }
+    int16_t y = font_size_height * line_index;
+    disp_add_string(0, y, string_line);
+
+    line_index++;
+    str_pointer_of_line_head = pointer + 1;
   }
 
   if (line_index > max_num_line)

@@ -83,7 +83,7 @@ ESP32をArduino IDEで使うためにボード情報をインストールしま�
 | OLED_clear | OLED_clear() | ディスプレイの表示を消す | Nan | ディスプレイの表示を消す． | 今はdisp_init()を呼び出すことで実装している．もう少しいい方法があるかも． |
 | disp_all_pixel | disp_all_pixel() | 全画素をONにする | Nan | 全画素をONにする |  |
 | disp_add_string | disp_add_string(int16_t x, int16_t y, String message) | ディスプレイに文字を表示する． | Nan | messageに入力された文字列を(x, y)の位置に出力する．過去のディスプレイの表示は消されずに追加される． |  |
-| disp_show_string | disp_show_string(String message) | 入力された文字列を成型して表示 | Nan | messageで入力された文字列を画面端もしくは"\n"で折り返す．縦方向には特に処理を行わないのであまり多くの文字を各と画面下で文字が切れる．（簡単な判定で警告を出す機能はある．） | まだdebugしていない． |
+| disp_show_string | disp_show_string(String message) | 入力された文字列を成型して表示 | Nan | messageで入力された文字列を画面端もしくは"\n"で折り返す．縦方向には特に処理を行わないのであまり多くの文字を各と画面下で文字が切れる．（簡単な判定で警告を出す機能はある．） | 2行まではうまく表示できるはず．．．あまり期待した動作をしなさそうです．．． |
 
 ### SIGNAL_LED_controller.ino
 | 関数名 | 構文 | 機能 | 返り値 | 処理説明 | 備考 |
